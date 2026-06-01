@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_domain_table.html" import domain_table %}
+{% block title %}域名列表 - 域名管理系统{% endblock %}
+{% block content %}
+<div style="display:flex; align-items:center; justify-content:space-between;">
+  <h2>域名列表</h2>
+  <div>
+    <a class="btn btn-primary" href="{{ url_for('domains.new_domain_form') }}">新增域名</a>
+    <form class="inline" method="post" action="{{ url_for('config.cloudflare_sync') }}">
+      <button class="btn btn-light" type="submit">从 Cloudflare 同步</button>
+    </form>
+  </div>
+</div>
+
+<div class="filters" style="margin: 12px 0;">
+  <span class="muted">筛选：</span>
+  <a class="btn btn-light" href="{{ url_for('domains.list_domains') }}">全部</a>
+  {% for s in statuses %}
+    <a class="btn btn-light" href="{{ url_for('domains.list_domains', status=s) }}"
+       {% if current_filter == s %}style="outline:2px solid #2f6feb;"{% endif %}>{{ s }}</a>
+  {% endfor %}
+</div>
+
+{{ domain_table(rows, show_actions=true) }}
+{% endblock %}

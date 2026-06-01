@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}登录 - 域名管理系统{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 380px; margin: 60px auto;">
+  <h2 style="margin-top:0;">登录</h2>
+  <form method="post" action="{{ url_for('auth.login') }}{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}">
+    <label for="username">用户名</label>
+    <input type="text" id="username" name="username" autocomplete="username" required>
+    <label for="password">密码</label>
+    <input type="password" id="password" name="password" autocomplete="current-password" required>
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" type="submit">登录</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

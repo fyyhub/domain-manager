@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}配置 - 域名管理系统{% endblock %}
+{% block content %}
+<h2>配置</h2>
+
+<div class="card">
+  <h3 style="margin-top:0;">提醒阈值</h3>
+  <form method="post" action="{{ url_for('config.save_config') }}">
+    <input type="hidden" name="section" value="thresholds">
+    <label for="status_threshold">状态阈值（天，1–365）：剩余天数小于等于此值标记为"临近到期"</label>
+    <input type="number" id="status_threshold" name="status_threshold" min="1" max="365"
+           value="{{ config.status_threshold }}">
+    <label for="reminder_thresholds">提醒发送阈值（逗号分隔，1–10 个，每个 1–3650 天）</label>
+    <input type="text" id="reminder_thresholds" name="reminder_thresholds"
+           value="{{ config.reminder_thresholds | join(', ') }}">
+    <div style="margin-top:12px;"><button class="btn btn-primary" type="submit">保存阈值</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0;">通知渠道</h3>
+  <form method="post" action="{{ url_for('config.save_config') }}">
+    <input type="hidden" name="section" value="notification">
+    <label><input type="checkbox" name="in_page_enabled" {{ 'checked' if config.in_page_enabled }}> 页面内提醒</label>
+    <label><input type="checkbox" name="email_enabled" {{ 'checked' if config.email_enabled }}> 电子邮件提醒</label>
+    <label for="smtp_host">SMTP 服务器地址</label>
+    <input type="text" id="smtp_host" name="smtp_host" value="{{ config.smtp_host }}">
+    <label for="smtp_port">端口</label>
+    <input type="number" id="smtp_port" name="smtp_port" value="{{ config.smtp_port or '' }}">
+    <label for="smtp_username">发件账户</label>
+    <input type="text" id="smtp_username" name="smtp_username" value="{{ config.smtp_username }}">
+    <label for="smtp_credential">认证凭据（留空则保留现有）当前：<span class="muted">{{ config.smtp_credential_mask or '未设置' }}</span></label>
+    <input type="password" id="smtp_credential" name="smtp_credential" autocomplete="new-password">
+    <label for="email_to">收件地址</label>
+    <input type="text" id="email_to" name="email_to" value="{{ config.email_to }}">
+    <div style="margin-top:12px;"><button class="btn btn-primary" type="submit">保存通知配置</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0;">Cloudflare 凭证</h3>
+  <p class="muted">当前凭证：{{ config.cloudflare_token_mask or '未设置' }}（不回显明文）</p>
+  <form method="post" action="{{ url_for('config.save_config') }}">
+    <input type="hidden" name="section" value="cloudflare">
+    <label for="cloudflare_token">API Token（留空则保留现有）</label>
+    <input type="password" id="cloudflare_token" name="cloudflare_token" autocomplete="new-password">
+    <div style="margin-top:12px;"><button class="btn btn-primary" type="submit">保存凭证</button></div>
+  </form>
+</div>
+{% endblock %}

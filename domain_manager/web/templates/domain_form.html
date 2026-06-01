@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ '编辑' if mode == 'edit' else '新增' }}域名 - 域名管理系统{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 520px;">
+  <h2 style="margin-top:0;">{{ '编辑域名' if mode == 'edit' else '新增域名' }}</h2>
+  <form method="post"
+        action="{% if mode == 'edit' %}{{ url_for('domains.update_domain', domain_id=domain_id) }}{% else %}{{ url_for('domains.create_domain') }}{% endif %}">
+    <label for="name">域名名称（三级域名，如 sub.example.com）</label>
+    <input type="text" id="name" name="name" value="{{ form.get('name', '') }}" required>
+
+    <label for="expiration_date">到期时间</label>
+    <input type="date" id="expiration_date" name="expiration_date" value="{{ form.get('expiration_date', '') }}">
+
+    <label for="platform">托管平台</label>
+    <input type="text" id="platform" name="platform" value="{{ form.get('platform', '') }}" placeholder="Cloudflare">
+
+    <label for="notes">备注</label>
+    <textarea id="notes" name="notes" rows="3">{{ form.get('notes', '') }}</textarea>
+
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" type="submit">保存</button>
+      <a class="btn btn-light" href="{{ url_for('domains.list_domains') }}">取消</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

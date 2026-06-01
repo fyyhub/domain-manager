@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% from "_domain_table.html" import domain_table %}
+{% block title %}仪表盘 - 域名管理系统{% endblock %}
+{% block content %}
+<h2>到期提醒</h2>
+<p class="muted">以下为临近到期（Expiring）或已过期（Expired）的域名。</p>
+{{ domain_table(rows, show_actions=false) }}
+{% endblock %}
