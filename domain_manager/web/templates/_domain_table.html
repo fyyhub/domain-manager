@@ -7,6 +7,7 @@
       <th>剩余天数</th>
       <th>状态</th>
       <th>来源</th>
+      <th>来源渠道</th>
       {% if show_actions %}<th>操作</th>{% endif %}
     </tr>
   </thead>
@@ -30,6 +31,7 @@
       </td>
       <td><span class="badge {{ row.badge }}">{{ row.status }}</span></td>
       <td>{{ row.source }}</td>
+      <td>{{ row.channel }}</td>
       {% if show_actions %}
       <td>
         <a class="btn btn-light" href="{{ url_for('domains.edit_domain_form', domain_id=row.id) }}">编辑</a>
@@ -41,7 +43,7 @@
       {% endif %}
     </tr>
     {% else %}
-    <tr><td colspan="{{ 6 if show_actions else 5 }}" class="muted">暂无记录</td></tr>
+    <tr><td colspan="{{ 7 if show_actions else 6 }}" class="muted">暂无记录</td></tr>
     {% endfor %}
   </tbody>
 </table>

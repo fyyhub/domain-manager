@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS domains (
     source TEXT,
     registered_date TEXT,
     notes TEXT,
+    channel TEXT,
     created_at TEXT,
     updated_at TEXT
 );
@@ -110,6 +111,7 @@ class DataStore:
             conn = self._connect()
             try:
                 conn.executescript(_SCHEMA)
+                self._ensure_channel_column(conn)
                 conn.commit()
             finally:
                 conn.close()
@@ -136,6 +138,13 @@ class DataStore:
             # 只读打开失败（如不存在）不视为损坏，交由上层处理。
             return False
 
+    @staticmethod
+    def _ensure_channel_column(conn: sqlite3.Connection) -> None:
+        """兼容旧库：若 channel 列不存在则自动添加。"""
+        cols = [row["name"] for row in conn.execute("PRAGMA table_info(domains)").fetchall()]
+        if "channel" not in cols:
+            conn.execute("ALTER TABLE domains ADD COLUMN channel TEXT")
+
     # ----------------------------------------------------------------- #
     # 域名记录
     # ----------------------------------------------------------------- #
@@ -159,6 +168,8 @@ class DataStore:
             try:
                 # 确保表结构存在（对已有的合法空库）。
                 conn.executescript(_SCHEMA)
+                self._ensure_channel_column(conn)
+                conn.commit()
                 rows = conn.execute("SELECT * FROM domains").fetchall()
             finally:
                 conn.close()
@@ -180,6 +191,7 @@ class DataStore:
             source=Source(r["source"]) if r["source"] else Source.MANUAL,
             registered_date=_str_to_date(r["registered_date"]),
             notes=r["notes"] or "",
+            channel=r["channel"] if "channel" in r.keys() and r["channel"] else "",
             status=DomainStatus.ACTIVE,  # 派生字段，由上层重算
             created_at=_str_to_dt(r["created_at"]),
             updated_at=_str_to_dt(r["updated_at"]),
@@ -189,8 +201,8 @@ class DataStore:
         """插入一条新域名记录（需求 6.1/6.5）。"""
         return self._write(
             "INSERT INTO domains "
-            "(id, name, expiration_date, platform, source, registered_date, notes, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "(id, name, expiration_date, platform, source, registered_date, notes, channel, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 record.id,
                 record.name,
@@ -199,6 +211,7 @@ class DataStore:
                 record.source.value,
                 _date_to_str(record.registered_date),
                 record.notes,
+                record.channel,
                 _dt_to_str(record.created_at),
                 _dt_to_str(record.updated_at),
             ),
@@ -208,7 +221,7 @@ class DataStore:
         """更新一条已存在的域名记录（需求 6.1/6.5）。"""
         return self._write(
             "UPDATE domains SET name=?, expiration_date=?, platform=?, source=?, "
-            "registered_date=?, notes=?, created_at=?, updated_at=? WHERE id=?",
+            "registered_date=?, notes=?, channel=?, created_at=?, updated_at=? WHERE id=?",
             (
                 record.name,
                 _date_to_str(record.expiration_date),
@@ -216,6 +229,7 @@ class DataStore:
                 record.source.value,
                 _date_to_str(record.registered_date),
                 record.notes,
+                record.channel,
                 _dt_to_str(record.created_at),
                 _dt_to_str(record.updated_at),
                 record.id,

@@ -35,6 +35,7 @@ class DomainInput:
     notes: str = ""
     source: Source = Source.MANUAL
     registered_date: object = None
+    channel: str = ""
 
 
 class DomainService:
@@ -94,6 +95,7 @@ class DomainService:
             source=data.source,
             registered_date=parse_date(data.registered_date),
             notes=data.notes,
+            channel=data.channel,
             created_at=now,
             updated_at=now,
         )
@@ -135,6 +137,7 @@ class DomainService:
             source=data.source,
             registered_date=parse_date(data.registered_date),
             notes=data.notes,
+            channel=data.channel,
             created_at=existing.created_at,
             updated_at=datetime.now(),
         )
@@ -178,6 +181,7 @@ class DomainService:
             source=Source.CLOUDFLARE,
             registered_date=parse_date(data.registered_date),
             notes=data.notes,
+            channel=data.channel or "Cloudflare",
             created_at=now,
             updated_at=now,
         )
@@ -209,6 +213,7 @@ class DomainService:
             source=data.source,
             registered_date=parse_date(data.registered_date),
             notes=data.notes,
+            channel=data.channel,
             created_at=existing.created_at,
             updated_at=datetime.now(),
         )

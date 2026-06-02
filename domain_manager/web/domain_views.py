@@ -1,6 +1,8 @@
 """域名列表、仪表盘与 CRUD 路由（需求 1、4.1、8）。"""
 from __future__ import annotations
 
+from collections import OrderedDict
+
 from flask import (
     Blueprint,
     current_app,
@@ -51,10 +53,20 @@ def _view_rows(records):
                 "badge": STATUS_BADGE[r.status],
                 "source": r.source.value,
                 "notes": r.notes,
+                "channel": r.channel or "",
                 "missing_expiration": r.expiration_date is None,
             }
         )
     return rows
+
+
+def _group_rows_by_channel(rows):
+    """将行按 channel 分组，返回 OrderedDict(channel -> list of rows)。"""
+    groups = OrderedDict()
+    for row in rows:
+        ch = row.get("channel") or "未分类"
+        groups.setdefault(ch, []).append(row)
+    return groups
 
 
 @domains_bp.route("/")
@@ -78,9 +90,12 @@ def list_domains():
     if status_param in {s.value for s in DomainStatus}:
         status_filter = DomainStatus(status_param)
     records = service.list_domains(status_filter=status_filter)
+    rows = _view_rows(records)
+    groups = _group_rows_by_channel(rows)
     return render_template(
         "domains.html",
-        rows=_view_rows(records),
+        rows=rows,
+        groups=groups,
         current_filter=status_param or "",
         statuses=[s.value for s in DomainStatus],
     )
@@ -96,6 +111,7 @@ def create_domain():
         expiration_date=request.form.get("expiration_date", "").strip(),
         platform=request.form.get("platform", "").strip(),
         notes=request.form.get("notes", "").strip(),
+        channel=request.form.get("channel", "").strip(),
     )
     result = service.create_domain(data)
     if result.is_err:
@@ -130,6 +146,7 @@ def edit_domain_form(domain_id):
         "expiration_date": r.expiration_date.isoformat() if r.expiration_date else "",
         "platform": r.platform,
         "notes": r.notes,
+        "channel": r.channel,
     }
     return render_template(
         "domain_form.html", mode="edit", form=form, domain_id=domain_id
@@ -146,6 +163,7 @@ def update_domain(domain_id):
         expiration_date=request.form.get("expiration_date", "").strip(),
         platform=request.form.get("platform", "").strip(),
         notes=request.form.get("notes", "").strip(),
+        channel=request.form.get("channel", "").strip(),
     )
     result = service.update_domain(domain_id, data)
     if result.is_err:

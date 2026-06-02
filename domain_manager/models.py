@@ -121,6 +121,7 @@ class DomainRecord:
     source: Source = Source.MANUAL
     registered_date: Optional[date] = None
     notes: str = ""
+    channel: str = ""
     id: str = field(default_factory=_new_id)
     status: DomainStatus = DomainStatus.ACTIVE
     created_at: Optional[datetime] = None

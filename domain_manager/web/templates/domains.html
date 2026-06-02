@@ -21,5 +21,33 @@
   {% endfor %}
 </div>
 
-{{ domain_table(rows, show_actions=true) }}
+{# ---------- 按来源渠道分组树形展示 ---------- #}
+{% if groups %}
+  {% for channel, group_rows in groups.items() %}
+  <details open style="margin-bottom: 12px; border: 1px solid #d0d7de; border-radius: 6px;">
+    <summary style="cursor:pointer; padding: 8px 14px; background: #f6f8fa; font-weight: 600; user-select:none; border-radius: 6px;">
+      📁 {{ channel }}
+      <span class="muted" style="font-weight:normal; margin-left:6px;">({{ group_rows|length }} 个域名)</span>
+    </summary>
+    <div style="padding: 0 4px;">
+      {{ domain_table(group_rows, show_actions=true) }}
+    </div>
+  </details>
+  {% endfor %}
+{% else %}
+  <p class="muted">暂无记录</p>
+{% endif %}
+
+<style>
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before {
+    content: '▶';
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.15s;
+    font-size: 0.75em;
+  }
+  details[open] summary::before { transform: rotate(90deg); }
+  details summary:hover { background: #eef2f7; }
+</style>
 {% endblock %}
